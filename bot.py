@@ -17,16 +17,16 @@ client = discord.Client(intents=intents)
 
 # ======================
 # BOSS CONFIG
-# Replace IMAGE URLs with your own cleaned links
+# Replace IMAGE URLs with public links
 # ======================
 BOSSES = {
-    "behe": {"name": "Behemoth", "cooldown": 4*60*60, "image": "https://cdn.ares.reforgix.com/strapi/medium_behe_32ab46b655.png"},
-    "manti": {"name": "Manticore", "cooldown": 26*60*60, "image": "https://cdn.ares.reforgix.com/strapi/small_Manticore_enhanced_26c4679ff1.png"},
+    "behe": {"name": "Behemoth", "cooldown": 4*60*60, "image": "https://cdn.discordapp.com/attachments/.../behe.png"},
+    "manti": {"name": "Manticore", "cooldown": 26*60*60, "image": "https://cdn.discordapp.com/attachments/.../manti.png"},
     "ogre": {"name": "Ogre Master", "cooldown": 26*60*60, "image": "https://cdn.discordapp.com/attachments/.../ogre.png"},
-    "bd": {"name": "Bone Drake", "cooldown": 26*60*60, "image": "https://cdn.ares.reforgix.com/strapi/large_Bone_Drake_Enhanced_7c3fa99afa.png"},
-    "bapho": {"name": "Baphomet", "cooldown": 26*60*60, "image": "https://cdn.ares.reforgix.com/strapi/large_Baphomet_Enhanced_c9fbac3c9e.png"},
-    "od": {"name": "Ocean Dragon", "cooldown": 26*60*60, "image": "https://cdn.ares.reforgix.com/strapi/large_OD_Enhanced_1603fd7734.png"},
-    "ds": {"name": "Demon Servant", "cooldown": 26*60*60, "image": "https://cdn.ares.reforgix.com/strapi/small_ds_side_8207186008.png"},
+    "bd": {"name": "Bone Drake", "cooldown": 26*60*60, "image": "https://cdn.discordapp.com/attachments/.../bd.png"},
+    "bapho": {"name": "Baphomet", "cooldown": 26*60*60, "image": "https://cdn.discordapp.com/attachments/.../bapho.png"},
+    "od": {"name": "Ocean Dragon", "cooldown": 26*60*60, "image": "https://cdn.discordapp.com/attachments/.../od.png"},
+    "ds": {"name": "Demon Servant", "cooldown": 26*60*60, "image": "https://cdn.discordapp.com/attachments/.../ds.png"},
 }
 
 # ======================
@@ -45,22 +45,40 @@ def save_timers(data):
 timers = load_timers()
 
 # ======================
-# TIMER TASK
+# TIMER TASK WITH LIVE COUNTDOWN
 # ======================
 async def run_timer(channel, boss_key, end_time):
-    remaining = end_time - time.time()
-    if remaining > 0:
-        await asyncio.sleep(remaining)
-
     embed = discord.Embed(
+        title=f"{BOSSES[boss_key]['name']} Killed!",
+        description="Calculating next spawn...",
+        color=0xff0000
+    )
+    if BOSSES[boss_key].get("image"):
+        embed.set_image(url=BOSSES[boss_key]["image"])
+
+    msg = await channel.send(embed=embed)
+
+    while True:
+        remaining_seconds = int(end_time - time.time())
+        if remaining_seconds <= 0:
+            break
+
+        hours = remaining_seconds // 3600
+        minutes = (remaining_seconds % 3600) // 60
+        embed.description = f"Next spawn in **{hours}h {minutes}m**"
+        await msg.edit(embed=embed)
+
+        await asyncio.sleep(60)
+
+    finished_embed = discord.Embed(
         title=f"{BOSSES[boss_key]['name']} is READY!",
         description=PING_ROLE,
         color=0x00ff00
     )
     if BOSSES[boss_key].get("image"):
-        embed.set_image(url=BOSSES[boss_key]["image"])
+        finished_embed.set_image(url=BOSSES[boss_key]["image"])
 
-    await channel.send(embed=embed)
+    await msg.edit(embed=finished_embed)
     timers.pop(boss_key, None)
     save_timers(timers)
 
@@ -133,16 +151,9 @@ async def on_message(message):
     timers[key] = end_time
     save_timers(timers)
 
-    hours = BOSSES[key]["cooldown"] // 3600
-    embed = discord.Embed(
-        title=f"{BOSSES[key]['name']} Killed!",
-        description=f"Next spawn in **{hours} hours**.",
-        color=0xff0000
-    )
-    if BOSSES[key].get("image"):
-        embed.set_image(url=BOSSES[key]["image"])
-
-    await output_channel.send(embed=embed)
     client.loop.create_task(run_timer(output_channel, key, end_time))
 
+# ======================
+# START BOT
+# ======================
 client.run(TOKEN)
