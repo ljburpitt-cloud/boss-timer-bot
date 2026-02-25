@@ -14,34 +14,13 @@ intents.message_content = True
 client = discord.Client(intents=intents)
 
 BOSSES = {
-    "behe": {
-        "name": "Behemoth",
-        "cooldown": 4 * 60 * 60
-    },
-    "manti": {
-        "name": "Manticore",
-        "cooldown": 26 * 60 * 60
-    },
-    "ogre": {
-        "name": "Ogre Master",
-        "cooldown": 26 * 60 * 60
-    },
-    "bd": {
-        "name": "Bone Drake",
-        "cooldown": 26 * 60 * 60
-    },
-    "bapho": {
-        "name": "Baphomet",
-        "cooldown": 26 * 60 * 60
-    },
-    "od": {
-        "name": "Ocean Dragon",
-        "cooldown": 26 * 60 * 60
-    },
-    "ds": {
-        "name": "Demon Servant",
-        "cooldown": 26 * 60 * 60
-    }
+    "behe": {"name": "Behemoth", "cooldown": 4 * 60 * 60},
+    "manti": {"name": "Manticore", "cooldown": 26 * 60 * 60},
+    "ogre": {"name": "Ogre Master", "cooldown": 26 * 60 * 60},
+    "bd": {"name": "Bone Drake", "cooldown": 26 * 60 * 60},
+    "bapho": {"name": "Baphomet", "cooldown": 26 * 60 * 60},
+    "od": {"name": "Ocean Dragon", "cooldown": 26 * 60 * 60},
+    "ds": {"name": "Demon Servant", "cooldown": 26 * 60 * 60},
 }
 
 def load_timers():
@@ -61,12 +40,9 @@ async def run_timer(channel, boss_key, end_time):
     if remaining > 0:
         await asyncio.sleep(remaining)
 
-    hours = BOSSES[key]["cooldown"] // 3600
-
-await message.channel.send(
-    f"🕒 **{BOSSES[key]['name']} killed!**\n"
-    f"Next spawn in **{hours} hours**."
-)
+    await channel.send(
+        f"🔥 **{BOSSES[boss_key]['name']} is ready to spawn!** {PING_ROLE}"
+    )
 
     timers.pop(boss_key, None)
     save_timers(timers)
@@ -105,9 +81,11 @@ async def on_message(message):
         timers[key] = end_time
         save_timers(timers)
 
+        hours = BOSSES[key]["cooldown"] // 3600
+
         await message.channel.send(
             f"🕒 **{BOSSES[key]['name']} killed!**\n"
-            f"Next spawn in **4 hours**."
+            f"Next spawn in **{hours} hours**."
         )
 
         client.loop.create_task(
