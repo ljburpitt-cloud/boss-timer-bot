@@ -14,10 +14,8 @@ intents.message_content = True
 client = discord.Client(intents=intents)
 
 BOSSES = {
-    "behe": {
-        "name": "Behemoth",
-        "cooldown": 4 * 60 * 60
-    }
+    "behe": {"name": "Behemoth","cooldown": 4 * 60 * 60},
+    "od": {"name": "Ocean Dragon", "cooldown": 4 * 60 * 60},
 }
 
 def load_timers():
