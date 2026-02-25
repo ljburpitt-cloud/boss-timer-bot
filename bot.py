@@ -20,41 +20,13 @@ client = discord.Client(intents=intents)
 # Replace IMAGE URLs with your own cleaned links
 # ======================
 BOSSES = {
-    "behe": {
-        "name": "Behemoth",
-        "cooldown": 4 * 60 * 60,
-        "image": "https://cdn.ares.reforgix.com/strapi/medium_behe_32ab46b655.png"
-    },
-    "manti": {
-        "name": "Manticore",
-        "cooldown": 26 * 60 * 60,
-        "image": "https://cdn.ares.reforgix.com/strapi/small_Manticore_enhanced_26c4679ff1.png"
-    },
-    "ogre": {
-        "name": "Ogre Master",
-        "cooldown": 26 * 60 * 60,
-        "image": "https://cdn.ares.reforgix.com/strapi/medium_OM_2c4fd15921.png"
-    },
-    "bd": {
-        "name": "Bone Drake",
-        "cooldown": 26 * 60 * 60,
-        "image": "https://cdn.ares.reforgix.com/strapi/large_Bone_Drake_Enhanced_7c3fa99afa.png"
-    },
-    "bapho": {
-        "name": "Baphomet",
-        "cooldown": 26 * 60 * 60,
-        "image": "https://cdn.ares.reforgix.com/strapi/large_Baphomet_Enhanced_c9fbac3c9e.png"
-    },
-    "od": {
-        "name": "Ocean Dragon",
-        "cooldown": 26 * 60 * 60,
-        "image": "https://cdn.ares.reforgix.com/strapi/large_OD_Enhanced_1603fd7734.png"
-    },
-    "ds": {
-        "name": "Demon Servant",
-        "cooldown": 26 * 60 * 60,
-        "image": "https://cdn.ares.reforgix.com/strapi/small_ds_side_8207186008.png"
-    },
+    "behe": {"name": "Behemoth", "cooldown": 4*60*60, "image": "https://cdn.ares.reforgix.com/strapi/medium_behe_32ab46b655.png"},
+    "manti": {"name": "Manticore", "cooldown": 26*60*60, "image": "https://cdn.ares.reforgix.com/strapi/small_Manticore_enhanced_26c4679ff1.png"},
+    "ogre": {"name": "Ogre Master", "cooldown": 26*60*60, "image": "https://cdn.discordapp.com/attachments/.../ogre.png"},
+    "bd": {"name": "Bone Drake", "cooldown": 26*60*60, "image": "https://cdn.ares.reforgix.com/strapi/large_Bone_Drake_Enhanced_7c3fa99afa.png"},
+    "bapho": {"name": "Baphomet", "cooldown": 26*60*60, "image": "https://cdn.ares.reforgix.com/strapi/large_Baphomet_Enhanced_c9fbac3c9e.png"},
+    "od": {"name": "Ocean Dragon", "cooldown": 26*60*60, "image": "https://cdn.ares.reforgix.com/strapi/large_OD_Enhanced_1603fd7734.png"},
+    "ds": {"name": "Demon Servant", "cooldown": 26*60*60, "image": "https://cdn.ares.reforgix.com/strapi/small_ds_side_8207186008.png"},
 }
 
 # ======================
@@ -89,7 +61,6 @@ async def run_timer(channel, boss_key, end_time):
         embed.set_image(url=BOSSES[boss_key]["image"])
 
     await channel.send(embed=embed)
-
     timers.pop(boss_key, None)
     save_timers(timers)
 
@@ -99,16 +70,11 @@ async def run_timer(channel, boss_key, end_time):
 @client.event
 async def on_ready():
     print(f"Logged in as {client.user}")
-
     for guild in client.guilds:
-        output_channel = discord.utils.get(
-            guild.text_channels, name=OUTPUT_CHANNEL
-        )
+        output_channel = discord.utils.get(guild.text_channels, name=OUTPUT_CHANNEL)
         if output_channel:
             for boss_key, end_time in timers.items():
-                client.loop.create_task(
-                    run_timer(output_channel, boss_key, end_time)
-                )
+                client.loop.create_task(run_timer(output_channel, boss_key, end_time))
 
 # ======================
 # MESSAGE HANDLER
@@ -120,7 +86,6 @@ async def on_message(message):
 
     # ===== RESET COMMAND =====
     if message.content.lower().startswith("!reset"):
-        # Check server owner by ID
         if message.author.id != message.guild.owner_id:
             await message.channel.send("❌ Only the server owner can reset timers.")
             return
@@ -138,9 +103,7 @@ async def on_message(message):
         timers.pop(boss_key)
         save_timers(timers)
 
-        output_channel = discord.utils.get(
-            message.guild.text_channels, name=OUTPUT_CHANNEL
-        )
+        output_channel = discord.utils.get(message.guild.text_channels, name=OUTPUT_CHANNEL)
         if output_channel:
             await output_channel.send(f"🔄 **{BOSSES[boss_key]['name']} timer has been reset by the owner.**")
         return
@@ -153,22 +116,17 @@ async def on_message(message):
     if key not in BOSSES:
         return
 
-    output_channel = discord.utils.get(
-        message.guild.text_channels, name=OUTPUT_CHANNEL
-    )
+    output_channel = discord.utils.get(message.guild.text_channels, name=OUTPUT_CHANNEL)
     if not output_channel:
         return
 
     if key in timers:
         remaining_seconds = int(timers[key] - time.time())
-
-hours = remaining_seconds // 3600
-minutes = (remaining_seconds % 3600) // 60
-
-await output_channel.send(
-    f"⏳ **{BOSSES[key]['name']} timer already running** "
-    f"({hours}h {minutes}m remaining)"
-)
+        hours = remaining_seconds // 3600
+        minutes = (remaining_seconds % 3600) // 60
+        await output_channel.send(
+            f"⏳ **{BOSSES[key]['name']} timer already running** ({hours}h {minutes}m remaining)"
+        )
         return
 
     end_time = time.time() + BOSSES[key]["cooldown"]
@@ -176,7 +134,6 @@ await output_channel.send(
     save_timers(timers)
 
     hours = BOSSES[key]["cooldown"] // 3600
-
     embed = discord.Embed(
         title=f"{BOSSES[key]['name']} Killed!",
         description=f"Next spawn in **{hours} hours**.",
@@ -186,9 +143,6 @@ await output_channel.send(
         embed.set_image(url=BOSSES[key]["image"])
 
     await output_channel.send(embed=embed)
-
-    client.loop.create_task(
-        run_timer(output_channel, key, end_time)
-    )
+    client.loop.create_task(run_timer(output_channel, key, end_time))
 
 client.run(TOKEN)
