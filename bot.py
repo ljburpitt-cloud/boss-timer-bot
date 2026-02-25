@@ -22,7 +22,7 @@ BOSSES = {
     "behe": {
         "name": "Behemoth",
         "cooldown": 4 * 60 * 60,
-        "image": "https://discord.com/channels/677548971073339409/1476331499082088649/1476331565259821087"
+        "image": "https://cdn.discordapp.com/attachments/1476331499082088649/1476338428726739065/behe.png"
     },
     "manti": {
         "name": "Manticore",
