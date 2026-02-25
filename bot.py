@@ -17,42 +17,43 @@ client = discord.Client(intents=intents)
 
 # ======================
 # BOSS CONFIG
+# Replace IMAGE URLs with your own
 # ======================
 BOSSES = {
     "behe": {
         "name": "Behemoth",
         "cooldown": 4 * 60 * 60,
-        "image": "https://cdn.discordapp.com/attachments/1476331499082088649/1476338428726739065/behe.png"
+        "image": "https://cdn.discordapp.com/attachments/.../behe.png"
     },
     "manti": {
         "name": "Manticore",
         "cooldown": 26 * 60 * 60,
-        "image": "IMAGE_URL_HERE"
+        "image": "https://cdn.discordapp.com/attachments/.../manti.png"
     },
     "ogre": {
         "name": "Ogre Master",
         "cooldown": 26 * 60 * 60,
-        "image": "IMAGE_URL_HERE"
+        "image": "https://cdn.discordapp.com/attachments/.../ogre.png"
     },
     "bd": {
         "name": "Bone Drake",
         "cooldown": 26 * 60 * 60,
-        "image": "IMAGE_URL_HERE"
+        "image": "https://cdn.discordapp.com/attachments/.../bd.png"
     },
     "bapho": {
         "name": "Baphomet",
         "cooldown": 26 * 60 * 60,
-        "image": "IMAGE_URL_HERE"
+        "image": "https://cdn.discordapp.com/attachments/.../bapho.png"
     },
     "od": {
         "name": "Ocean Dragon",
         "cooldown": 26 * 60 * 60,
-        "image": "IMAGE_URL_HERE"
+        "image": "https://cdn.discordapp.com/attachments/.../od.png"
     },
     "ds": {
         "name": "Demon Servant",
         "cooldown": 26 * 60 * 60,
-        "image": "IMAGE_URL_HERE"
+        "image": "https://cdn.discordapp.com/attachments/.../ds.png"
     },
 }
 
@@ -84,7 +85,8 @@ async def run_timer(channel, boss_key, end_time):
         description=PING_ROLE,
         color=0x00ff00
     )
-    embed.set_image(url=BOSSES[boss_key]["image"])
+    if BOSSES[boss_key].get("image"):
+        embed.set_image(url=BOSSES[boss_key]["image"])
 
     await channel.send(embed=embed)
 
@@ -116,11 +118,38 @@ async def on_message(message):
     if message.author.bot:
         return
 
+    # ===== RESET COMMAND =====
+    if message.content.lower().startswith("!reset"):
+        # Only server owner can reset
+        if message.author != message.guild.owner:
+            await message.channel.send("❌ Only the server owner can reset timers.")
+            return
+
+        parts = message.content.lower().split()
+        if len(parts) != 2:
+            await message.channel.send("⚠ Usage: !reset <boss>")
+            return
+
+        boss_key = parts[1]
+        if boss_key not in timers:
+            await message.channel.send(f"⏹ No active timer for {boss_key}.")
+            return
+
+        timers.pop(boss_key)
+        save_timers(timers)
+
+        output_channel = discord.utils.get(
+            message.guild.text_channels, name=OUTPUT_CHANNEL
+        )
+        if output_channel:
+            await output_channel.send(f"🔄 **{BOSSES[boss_key]['name']} timer has been reset by the owner.**")
+        return
+
+    # ===== BOSS INPUT =====
     if message.channel.name != INPUT_CHANNEL:
         return
 
     key = message.content.lower()
-
     if key not in BOSSES:
         return
 
@@ -133,8 +162,7 @@ async def on_message(message):
     if key in timers:
         remaining = int((timers[key] - time.time()) / 60)
         await output_channel.send(
-            f"⏳ **{BOSSES[key]['name']} timer already running** "
-            f"({remaining} minutes left)"
+            f"⏳ **{BOSSES[key]['name']} timer already running** ({remaining} minutes left)"
         )
         return
 
@@ -149,7 +177,8 @@ async def on_message(message):
         description=f"Next spawn in **{hours} hours**.",
         color=0xff0000
     )
-    embed.set_image(url=BOSSES[key]["image"])
+    if BOSSES[key].get("image"):
+        embed.set_image(url=BOSSES[key]["image"])
 
     await output_channel.send(embed=embed)
 
