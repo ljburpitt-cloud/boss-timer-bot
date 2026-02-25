@@ -160,10 +160,15 @@ async def on_message(message):
         return
 
     if key in timers:
-        remaining = int((timers[key] - time.time()) / 60)
-        await output_channel.send(
-            f"⏳ **{BOSSES[key]['name']} timer already running** ({remaining} minutes left)"
-        )
+        remaining_seconds = int(timers[key] - time.time())
+
+hours = remaining_seconds // 3600
+minutes = (remaining_seconds % 3600) // 60
+
+await output_channel.send(
+    f"⏳ **{BOSSES[key]['name']} timer already running** "
+    f"({hours}h {minutes}m remaining)"
+)
         return
 
     end_time = time.time() + BOSSES[key]["cooldown"]
