@@ -139,21 +139,15 @@ async def on_message(message):
 
     # ===== BLOCK REPOST IF TIMER ACTIVE =====
     if key in timers:
-        # Delete user message to prevent reposting
         try:
+            # Delete the user's message to prevent reposting
             await message.delete()
         except discord.Forbidden:
             pass  # If bot can't delete messages, ignore
 
-        remaining_seconds = int(timers[key] - time.time())
-        hours = remaining_seconds // 3600
-        minutes = (remaining_seconds % 3600) // 60
-
-        # Notify output channel
-        await output_channel.send(
-            f"⏳ **{BOSSES[key]['name']} timer already running** ({hours}h {minutes}m remaining)"
-        )
-        return
+        # Optional: add a reaction or message to indicate timer is running
+        await message.channel.send(f"⏳ **{BOSSES[key]['name']} timer is already running!**")
+        return  # STOP here, do NOT restart timer
 
     # Timer not active, start it
     end_time = time.time() + BOSSES[key]["cooldown"]
