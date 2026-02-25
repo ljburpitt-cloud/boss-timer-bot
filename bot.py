@@ -17,7 +17,6 @@ client = discord.Client(intents=intents)
 
 # ======================
 # BOSS CONFIG
-# Replace IMAGE URLs with public links
 # ======================
 BOSSES = {
     "behe": {"name": "Behemoth", "cooldown": 4*60*60, "image": "https://cdn.ares.reforgix.com/strapi/medium_behe_32ab46b655.png"},
@@ -138,15 +137,25 @@ async def on_message(message):
     if not output_channel:
         return
 
+    # ===== BLOCK REPOST IF TIMER ACTIVE =====
     if key in timers:
+        # Delete user message to prevent reposting
+        try:
+            await message.delete()
+        except discord.Forbidden:
+            pass  # If bot can't delete messages, ignore
+
         remaining_seconds = int(timers[key] - time.time())
         hours = remaining_seconds // 3600
         minutes = (remaining_seconds % 3600) // 60
+
+        # Notify output channel
         await output_channel.send(
             f"⏳ **{BOSSES[key]['name']} timer already running** ({hours}h {minutes}m remaining)"
         )
         return
 
+    # Timer not active, start it
     end_time = time.time() + BOSSES[key]["cooldown"]
     timers[key] = end_time
     save_timers(timers)
