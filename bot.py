@@ -61,9 +61,12 @@ async def run_timer(channel, boss_key, end_time):
     if remaining > 0:
         await asyncio.sleep(remaining)
 
-    await channel.send(
-        f"🔥 **{BOSSES[boss_key]['name']} is ready to spawn!** {PING_ROLE}"
-    )
+    hours = BOSSES[key]["cooldown"] // 3600
+
+await message.channel.send(
+    f"🕒 **{BOSSES[key]['name']} killed!**\n"
+    f"Next spawn in **{hours} hours**."
+)
 
     timers.pop(boss_key, None)
     save_timers(timers)
