@@ -20,15 +20,15 @@ client = discord.Client(intents=intents)
 # ======================
 BOSSES = {
     "behe": {"name": "Behemoth", "cooldown": 4*60*60, "image": "https://cdn.ares.reforgix.com/strapi/medium_behe_32ab46b655.png"},
-    "manti": {"name": "Manticore", "cooldown": 26*60*60, "image": "https://cdn.ares.reforgix.com/strapi/small_Manticore_enhanced_26c4679ff1.png"},
-    "ogre": {"name": "Ogre Master", "cooldown": 26*60*60, "image": "https://cdn.ares.reforgix.com/strapi/medium_OM_2c4fd15921.png"},
-    "bd": {"name": "Bone Drake", "cooldown": 26*60*60, "image": "https://cdn.ares.reforgix.com/strapi/large_Bone_Drake_Enhanced_7c3fa99afa.png"},
-    "bapho": {"name": "Baphomet", "cooldown": 26*60*60, "image": "https://cdn.ares.reforgix.com/strapi/large_Baphomet_Enhanced_c9fbac3c9e.png"},
-    "od": {"name": "Ocean Dragon", "cooldown": 26*60*60, "image": "https://cdn.ares.reforgix.com/strapi/large_OD_Enhanced_1603fd7734.png"},
-    "ds": {"name": "Demon Servant", "cooldown": 26*60*60, "image": "https://cdn.ares.reforgix.com/strapi/small_ds_side_8207186008.png"},
+    "manti": {"name": "Manticore", "cooldown": 25*60*60, "image": "https://cdn.ares.reforgix.com/strapi/small_Manticore_enhanced_26c4679ff1.png"},
+    "ogre": {"name": "Ogre Master", "cooldown": 25*60*60, "image": "https://cdn.ares.reforgix.com/strapi/medium_OM_2c4fd15921.png"},
+    "bd": {"name": "Bone Drake", "cooldown": 25*60*60, "image": "https://cdn.ares.reforgix.com/strapi/large_Bone_Drake_Enhanced_7c3fa99afa.png"},
+    "bapho": {"name": "Baphomet", "cooldown": 25*60*60, "image": "https://cdn.ares.reforgix.com/strapi/large_Baphomet_Enhanced_c9fbac3c9e.png"},
+    "od": {"name": "Ocean Dragon", "cooldown": 25*60*60, "image": "https://cdn.ares.reforgix.com/strapi/large_OD_Enhanced_1603fd7734.png"},
+    "ds": {"name": "Demon Servant", "cooldown": 25*60*60, "image": "https://cdn.ares.reforgix.com/strapi/small_ds_side_8207186008.png"},
     # New bosses
-    "eragon": {"name": "Eragon", "cooldown": 26*60*60, "image": "https://cdn.ares.reforgix.com/strapi/large_Eragon_Enhanced_d643b8781e.png"},
-    "mm": {"name": "Minotaur Master", "cooldown": 26*60*60, "image": "https://cdn.ares.reforgix.com/strapi/small_mino_8a7d50b220.png"},
+    "eragon": {"name": "Eragon", "cooldown": 25*60*60, "image": "https://cdn.ares.reforgix.com/strapi/large_Eragon_Enhanced_d643b8781e.png"},
+    "mm": {"name": "Minotaur Master", "cooldown": 25*60*60, "image": "https://cdn.ares.reforgix.com/strapi/small_mino_8a7d50b220.png"},
 }
 
 # ======================
