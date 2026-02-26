@@ -26,6 +26,9 @@ BOSSES = {
     "bapho": {"name": "Baphomet", "cooldown": 26*60*60, "image": "https://cdn.ares.reforgix.com/strapi/large_Baphomet_Enhanced_c9fbac3c9e.png"},
     "od": {"name": "Ocean Dragon", "cooldown": 26*60*60, "image": "https://cdn.ares.reforgix.com/strapi/large_OD_Enhanced_1603fd7734.png"},
     "ds": {"name": "Demon Servant", "cooldown": 26*60*60, "image": "https://cdn.ares.reforgix.com/strapi/small_ds_side_8207186008.png"},
+    # New bosses
+    "eragon": {"name": "Eragon", "cooldown": 26*60*60, "image": "https://cdn.ares.reforgix.com/strapi/large_Eragon_Enhanced_d643b8781e.png"},
+    "mm": {"name": "Minotaur Master", "cooldown": 26*60*60, "image": "https://cdn.ares.reforgix.com/strapi/small_mino_8a7d50b220.png"},
 }
 
 # ======================
@@ -143,11 +146,10 @@ async def on_message(message):
             # Delete the user's message to prevent reposting
             await message.delete()
         except discord.Forbidden:
-            pass  # If bot can't delete messages, ignore
+            pass
 
-        # Optional: add a reaction or message to indicate timer is running
         await message.channel.send(f"⏳ **{BOSSES[key]['name']} timer is already running!**")
-        return  # STOP here, do NOT restart timer
+        return
 
     # Timer not active, start it
     end_time = time.time() + BOSSES[key]["cooldown"]
