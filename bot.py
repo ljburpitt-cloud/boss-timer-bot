@@ -35,14 +35,14 @@ BOSSES = {
     "caveman": {"name": "Underwater Caveman", "min": 14*60*60, "max": 14*60*60, "image": "https://cdn.ares.reforgix.com/strapi/large_Caveman_Enhanced_444659f071.png"},
     "mandragora": {"name": "Mandragora", "min": 14*60*60, "max": 14*60*60, "image": "https://cdn.ares.reforgix.com/strapi/large_Mandragora_Enhanced_85f92fe9dc.png"},
 
-    # 14–16 window bosses (SAFE at 14h)
+    # 14–16 window bosses
     "mantrap": {"name": "Mantrap Plant", "min": 14*60*60, "max": 16*60*60, "image": "https://cdn.ares.reforgix.com/strapi/large_Mantrap_Plant_Enhanced_cd2343cf53.png"},
     "beelzebub": {"name": "Beelzebub", "min": 14*60*60, "max": 16*60*60, "image": "https://cdn.ares.reforgix.com/strapi/large_Beezlebub_Enhanced_68ef8a2ef2.png"},
     "minotaur": {"name": "Minotaur", "min": 14*60*60, "max": 16*60*60, "image": "https://cdn.ares.reforgix.com/strapi/small_mino_8a7d50b220.png"},
 }
 
 # ======================
-# SAVE / LOAD
+# LOAD / SAVE
 # ======================
 def load_timers():
     if not os.path.exists(DATA_FILE):
@@ -57,63 +57,65 @@ def save_timers(data):
 timers = load_timers()
 
 # ======================
-# TIMER TASK WITH WINDOW TRACKING
+# TIMER WITH WINDOW DISPLAY
 # ======================
 async def run_timer(channel, boss_key, data):
     boss = BOSSES[boss_key]
     start_time = data["start"]
-    end_time = data["max_end"]
+    min_end = data["min_end"]
+    max_end = data["max_end"]
 
     embed = discord.Embed(
         title=f"{boss['name']} Killed!",
-        description="Calculating next spawn...",
         color=0xff0000
     )
+
     if boss.get("image"):
         embed.set_image(url=boss["image"])
 
     msg = await channel.send(embed=embed)
 
-    min_alert_sent = False
-    mid_alert_sent = False
+    window_open_announced = False
 
     while True:
         now = time.time()
-        remaining_seconds = int(end_time - now)
 
-        if remaining_seconds <= 0:
+        if now >= max_end:
             break
 
-        elapsed = now - start_time
+        if now < min_end:
+            remaining = int(min_end - now)
+            hours = remaining // 3600
+            minutes = (remaining % 3600) // 60
 
-        # SPAWN WINDOW OPEN
-        if not min_alert_sent and elapsed >= boss["min"]:
-            await channel.send(f"🔥 **{boss['name']} SPAWN WINDOW OPEN!**")
-            min_alert_sent = True
+            embed.description = (
+                f"⏳ Spawn window opens in **{hours}h {minutes}m**\n\n"
+                f"Window: {time.strftime('%d %b %H:%M', time.localtime(min_end))} - "
+                f"{time.strftime('%d %b %H:%M', time.localtime(max_end))}"
+            )
 
-        # MID WINDOW ALERT (only for window bosses)
-        if boss["max"] != boss["min"]:
-            mid_point = (boss["min"] + boss["max"]) / 2
-            if not mid_alert_sent and elapsed >= mid_point:
-                await channel.send(f"⚠ **{boss['name']} mid spawn window reached!**")
-                mid_alert_sent = True
+        else:
+            if not window_open_announced:
+                await channel.send(f"🟢 **{boss['name']} SPAWN WINDOW OPEN!** {PING_ROLE}")
+                window_open_announced = True
 
-        hours = remaining_seconds // 3600
-        minutes = (remaining_seconds % 3600) // 60
-        embed.description = f"Spawn window closes in **{hours}h {minutes}m**"
+            remaining = int(max_end - now)
+            hours = remaining // 3600
+            minutes = (remaining % 3600) // 60
+
+            embed.description = (
+                f"🟢 **SPAWN WINDOW OPEN**\n"
+                f"🔴 Window closes in **{hours}h {minutes}m**\n\n"
+                f"Window: {time.strftime('%d %b %H:%M', time.localtime(min_end))} - "
+                f"{time.strftime('%d %b %H:%M', time.localtime(max_end))}"
+            )
+
         await msg.edit(embed=embed)
-
         await asyncio.sleep(60)
 
-    finished_embed = discord.Embed(
-        title=f"{boss['name']} FINAL WINDOW!",
-        description=PING_ROLE,
-        color=0x00ff00
-    )
-    if boss.get("image"):
-        finished_embed.set_image(url=boss["image"])
-
-    await msg.edit(embed=finished_embed)
+    embed.color = 0x00ff00
+    embed.description = "🔴 **SPAWN WINDOW CLOSED**"
+    await msg.edit(embed=embed)
 
     timers.pop(boss_key, None)
     save_timers(timers)
@@ -138,7 +140,7 @@ async def on_message(message):
     if message.author.bot:
         return
 
-    # ===== RESET =====
+    # RESET
     if message.content.lower().startswith("!reset"):
         if message.author.id != message.guild.owner_id:
             await message.channel.send("❌ Only the server owner can reset timers.")
@@ -162,7 +164,7 @@ async def on_message(message):
             await output_channel.send(f"🔄 **{BOSSES[boss_key]['name']} timer reset.**")
         return
 
-    # ===== BOSS INPUT =====
+    # BOSS INPUT
     if message.channel.name != INPUT_CHANNEL:
         return
 
@@ -174,7 +176,6 @@ async def on_message(message):
     if not output_channel:
         return
 
-    # BLOCK REPOST
     if key in timers:
         try:
             await message.delete()
@@ -192,10 +193,9 @@ async def on_message(message):
     }
 
     save_timers(timers)
-
     client.loop.create_task(run_timer(output_channel, key, timers[key]))
 
 # ======================
-# START
+# START BOT
 # ======================
 client.run(TOKEN)
